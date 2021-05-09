@@ -436,8 +436,10 @@ def annotations_to_instances_rotated(annos, image_size):
             This is the format that builtin models expect.
     """
     boxes = [obj["bbox"] for obj in annos]
+    masks = [obj["segmentation"] for obj in annos]
     target = Instances(image_size)
     boxes = target.gt_boxes = RotatedBoxes(boxes)
+    masks = target.gt_masks = PolygonMasks(masks)
     boxes.clip(image_size)
 
     classes = [obj["category_id"] for obj in annos]

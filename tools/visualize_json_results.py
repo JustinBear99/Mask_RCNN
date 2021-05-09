@@ -48,8 +48,8 @@ if __name__ == "__main__":
     parser.add_argument("--conf-threshold", default=0.5, type=float, help="confidence threshold")
     args = parser.parse_args()
     from detectron2.data.datasets import register_coco_instances
-    register_coco_instances("asparagus_train", {'_background_': 0, 'stalk': 1, 'spear': 2, 'shoot': 3} , "../datasets/coco/annotations/train/annotations.json", "../datasets/coco/annotations/train/")
-    register_coco_instances("asparagus_val", {'_background_': 0, 'stalk': 1, 'spear': 2, 'shoot': 3} , "../datasets/coco/annotations/test/annotations.json", "../datasets/coco/annotations/test/")
+    # register_coco_instances('asparagus_train_rotated', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3, 'bar': 4} , "../datasets/coco/annotations/train_rotated_637/annotations.json", "../datasets/coco/annotations/train_rotated_637")
+    register_coco_instances('asparagus_val', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3, 'bar': 4} , "../datasets/coco/annotations/val_ASABE/annotations.json", "../datasets/coco/annotations/val_ASABE")
     logger = setup_logger()
 
     with PathManager.open(args.input, "r") as f:

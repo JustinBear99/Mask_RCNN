@@ -20,6 +20,12 @@ import logging
 import os
 from collections import OrderedDict
 import torch
+# import copy
+# import json
+# import numpy as np
+# import random
+# from PIL import Image, ImageDraw
+# import cv2
 
 from detectron2.data.datasets import register_coco_instances
 import detectron2.utils.comm as comm
@@ -40,6 +46,149 @@ from detectron2.evaluation import (
 )
 from detectron2.modeling import GeneralizedRCNNWithTTA
 import detectron2.data.transforms as T
+# from detectron2.data import detection_utils as utils
+# from detectron2.structures import BoxMode
+
+# def randomDatasetdict():
+#     image_list = os.listdir('./datasets/coco/annotations/train/JPEGImages')
+#     random.shuffle(image_list)
+#     image_name = image_list[0]
+#     with open('./datasets/coco/annotations/train/annotations.json', 'r') as jsonfile:
+#         annofile = json.load(jsonfile)
+#     for it in annofile['images']:
+#         if it['file_name'] == 'JPEGImages/' + image_name:
+#             image_id = it['id']
+#             height = it["height"]
+#             width = it["width"]
+#     annotations = []
+#     for it in annofile['annotations']:
+#         if it['image_id'] == image_id and it['category_id'] == 3:
+#             annotations.append({'iscrowd': it["iscrowd"],
+#                                 'bbox': it["bbox"],
+#                                 'category_id': 3,
+#                                 'segmentation': it["segmentation"],
+#                                 'bbox_mode': BoxMode(1)})
+#     dataset_dict = {'file_name': './datasets/coco/annotations/train/JPEGImages/' + image_name,
+#                     'height': height,
+#                     'width': width,
+#                     'image_id': image_id,
+#                     'annotations': annotations}
+#     return dataset_dict
+
+# def readInfo(dataset_dict):
+#     image = utils.read_image(dataset_dict["file_name"], format="BGR")
+#     height, width = dataset_dict["height"], dataset_dict["width"]
+#     image = np.array(image)
+#     masks = []
+#     for annotation in dataset_dict["annotations"]:
+#         points = annotation["segmentation"][0]
+#         points_tuple = [ (points[i], points[i+1]) for ｉ in range(0, len(points)-1, 2) ]
+#         img = Image.new('L', (width, height), 0)
+#         ImageDraw.Draw(img).polygon(points_tuple, outline=1, fill=1)
+#         mask = np.array(img)
+#         mask = np.stack((mask,)*3, axis=-1)
+#         masks.append(mask)
+#     return image, masks
+    
+# def img_add(img, img2, masks2):
+#     h,w, c = img.shape
+    
+
+# def LSJ(img, masks, min_scale=0.1, max_scale=2.0):
+#     rescale_ratio = np.random.uniform(min_scale, max_scale)
+#     h, w, _ = img.shape
+
+#     # rescale
+#     h_new, w_new = int(h * rescale_ratio), int(w * rescale_ratio)
+#     img.resize((h_new, w_new))
+#     masks = [ mask.resize((h_new, w_new)) for mask in masks ]
+
+#     x, y = int(np.random.uniform(0, abs(w_new - w))), int(np.random.uniform(0, abs(h_new - h)))
+#     if rescale_ratio <= 1.0:  # padding
+#         img_pad = np.ones((h, w, 3), dtype=np.uint8) * 168
+#         img_pad[y:y+h_new, x:x+w_new, :] = img
+#         masks_pad = []
+#         for mask in masks:
+#             mask_pad = np.zeros((h, w), dtype=np.uint8)
+#             mask_pad[y:y+h_new, x:x+w_new] = mask
+#             masks_pad.append(mask_pad)
+#     else:  # crop
+#         img_crop = img[y:y+h, x:x+w, :]
+#         masks_crop = [ mask[y:y+h, x:x+w] for mask in masks ]
+#     return img_crop, masks_crop
+    
+
+# def mapper(dataset_dict):
+    
+#     dataset_dict = copy.deepcopy(dataset_dict)
+#     # image, masks = readInfo(dataset_dict)
+#     image = utils.read_image(dataset_dict["file_name"], format="BGR")
+#     image = np.array(image)
+#     dataset_dict_2 = randomDatasetdict()
+#     image_2 = utils.read_image(dataset_dict_2["file_name"], format="BGR")
+    
+#     height = dataset_dict_2["height"]
+#     width = dataset_dict_2["width"]
+#     for annotation in dataset_dict_2["annotations"]:
+#         points = annotation["segmentation"][0]
+#         [x, y, w, h] = annotation["bbox"]
+#         img = Image.new('L', (width, height), 0)
+#         points_tuple = [ (points[i], points[i+1]) for ｉ in range(0, len(points)-1, 2) ]
+#         # print(points_tuple)
+#         ImageDraw.Draw(img).polygon(points_tuple, outline=1, fill=1)
+#         mask_2 = np.array(img)
+#         mask_2 = np.stack((mask_2,)*3, axis=-1)
+
+
+
+
+#         cropped_img = image_2 * mask_2
+#         # im = Image.fromarray(cropped_img)
+#         # im.save("cropped_img.jpg")
+#         cropped_img = cropped_img[int(y):int(y+h), int(x):int(x+w), :]
+#         # im = Image.fromarray(cropped_img)
+#         # im.save("cropped_img_small.jpg")
+#         cropped_segmentation = [ point-w if index%2==0 else point-h for index, point in enumerate(points) ]
+#         new_x = random.randint(int((width-w)*1/4), int((width-w)*3/4))
+#         new_y = random.randint(int((height-h)*1/4), int((height-h)*3/4))
+#         # print('height:', height, 'width:', width, x, y, w, h,'new_x:', new_x, 'new_y:', new_y, 'new_x+w:', new_x+w, 'new_y+h:', new_y+h)
+#         new_segmentation = [ point+new_x if index%2==0 else point+new_y for index, point in enumerate(cropped_segmentation) ]
+
+        
+
+#         for i in range(new_y, new_y + int(h)-1):
+#             for j in range(new_x, new_x + int(w)-1):
+#                 for k in range(0, 2):
+#                     if cropped_img[i-new_y, j-new_x, k] == 0:
+#                         pass
+#                     else:
+#                         image[i, j, k] = cropped_img[i-new_y, j-new_x, k]
+#         dataset_dict['annotations'].append({'iscrowd': 0,
+#                                             'bbox': [new_x, new_y, w, h],
+#                                             'category_id': 3,
+#                                             'segmentation': [new_segmentation],
+#                                             'bbox_mode': BoxMode(1)
+#         })
+#     # print(dataset_dict)
+#     # auginput = T.AugInput(image)
+#     # transform = T.Resize((1920, 1080))(auginput)
+#     # im = Image.fromarray(image)
+#     # im.save("cropped_img_final.jpg")
+
+#     image, transform = T.apply_transform_gens([T.Resize((800, 800))], image)
+#     # image = torch.from_numpy(image.transpose(2, 0, 1))
+#     image = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
+#     annos = [
+#         utils.transform_instance_annotations(annotation, transform, image.shape[:2])
+#         for annotation in dataset_dict.pop("annotations")
+#     ]
+#     return {
+#        "image": image,
+#        "width": width,
+#        "height": height,
+#        "instances": utils.annotations_to_instances(annos, image.shape[:2])
+#     }
+
 
 class Trainer(DefaultTrainer):
     """
@@ -51,13 +200,14 @@ class Trainer(DefaultTrainer):
     """
     @classmethod
     def build_train_loader(cls, cfg):
+        # return build_detection_train_loader(cfg, mapper=mapper)
         return build_detection_train_loader(cfg, mapper=DatasetMapper(cfg, is_train=True, augmentations=[
-            T.ResizeShortestEdge(short_edge_length=(640, 672, 704, 736, 768, 800), max_size=1333, sample_style='choice'),
+            T.ResizeShortestEdge(short_edge_length=[900, 1200], max_size=1600, sample_style='range'),
             T.RandomFlip(),
-            T.RandomCrop('relative_range', (0.05, 0.05)),
-            T.RandomContrast(0.8, 1.2),
-            T.RandomBrightness(0.8, 1.2),
-            T.RandomExtent((0.2, 0.8), (0.2, 0.2))
+        #     T.RandomCrop('relative_range', (0.5, 0.5)),
+        #     T.RandomContrast(0.8, 1.2),
+        #     T.RandomBrightness(0.8, 1.2),
+        #     T.RandomExtent((0.2, 0.8), (0.2, 0.2))
         ]))
 
     @classmethod
@@ -141,8 +291,11 @@ def setup(args):
 
 
 def main(args):
-    register_coco_instances('asparagus_train', {'_background_': 0, 'stalk': 1, 'spear': 2, 'shoot': 3, 'bar': 4} , "./datasets/coco/annotations/train/annotations.json", "./datasets/coco/annotations/train")
-    register_coco_instances('asparagus_val', {'_background_': 0, 'stalk': 1, 'spear': 2, 'shoot': 3, 'bar': 4} , "./datasets/coco/annotations/test/annotations.json", "./datasets/coco/annotations/test")
+    # register_coco_instances('asparagus_train', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3, 'bar': 4} , "./datasets/coco/annotations/train/annotations.json", "./datasets/coco/annotations/train")
+    # register_coco_instances('asparagus_val', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3, 'bar': 4} , "./datasets/coco/annotations/test_458/annotations.json", "./datasets/coco/annotations/test_458")
+    register_coco_instances('asparagus_train', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3} , "./datasets/coco/annotations/train_firstiter/annotations.json", "./datasets/coco/annotations/train_firstiter")
+    register_coco_instances('asparagus_val', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3} , "./datasets/coco/annotations/val/annotations.json", "./datasets/coco/annotations/val")
+    
     cfg = setup(args)
 
     if args.eval_only:

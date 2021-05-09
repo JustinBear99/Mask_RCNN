@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVIDCES=1 python3 demo.py --config-file ../configs/COCO-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_3x.yaml --input ../datasets/coco/annotations/unlabeled/*.jpg --output ./vis --json_output ./vis --opts MODEL.WEIGHTS ../output/model_0269999.pth 

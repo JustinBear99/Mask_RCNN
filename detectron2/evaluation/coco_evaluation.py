@@ -284,6 +284,7 @@ class COCOEvaluator(DatasetEvaluator):
             # area range index 0: all area ranges
             # max dets index -1: typically 100 per image
             precision = precisions[:, :, idx, 0, -1]
+            # precision = precisions[0, :, idx, 0, -1]
             precision = precision[precision > -1]
             ap = np.mean(precision) if precision.size else float("nan")
             results_per_category.append(("{}".format(name), float(ap * 100)))

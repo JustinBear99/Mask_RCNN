@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1 python3 train_net_rotated.py --config-file configs/COCO-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_3x_rotated.yaml --num-gpus 1 --eval-only MODEL.WEIGHTS output/model_0184999.pth

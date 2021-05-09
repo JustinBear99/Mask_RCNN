@@ -43,6 +43,12 @@ def _do_paste_mask(masks, boxes, img_h, img_w, skip_empty=True):
         x0_int, y0_int = 0, 0
         x1_int, y1_int = img_w, img_h
     x0, y0, x1, y1 = torch.split(boxes, 1, dim=1)  # each is Nx1
+    # xc, yc, w, h, a = torch.split(boxes, 1, dim=1)
+    # x0 = xc - 0.5*w
+    # y0 = yc - 0.5*h
+    # x1 = xc + 0.5*w
+    # y1 = yc + 0.5*w
+
 
     N = masks.shape[0]
 

@@ -482,3 +482,11 @@ class RandomLighting(Augmentation):
         return BlendTransform(
             src_image=self.eigen_vecs.dot(weights * self.eigen_vals), src_weight=1.0, dst_weight=1.0
         )
+
+# class RandomCopyPaste(Augmentation):
+#     def __init__(self, cfg):
+#         super().__init__()
+#         self._init(locals())
+
+#     def get_transform(self, img):
+#         trainset = self.cfg.DATASET.TRAIN

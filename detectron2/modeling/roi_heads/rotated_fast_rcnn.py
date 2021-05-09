@@ -14,6 +14,7 @@ from ..proposal_generator.proposal_utils import add_ground_truth_to_proposals
 from .box_head import build_box_head
 from .fast_rcnn import FastRCNNOutputLayers
 from .roi_heads import ROI_HEADS_REGISTRY, StandardROIHeads
+from .mask_head import build_mask_head
 
 logger = logging.getLogger(__name__)
 
@@ -177,9 +178,9 @@ class RROIHeads(StandardROIHeads):
         NOTE: this interface is experimental.
         """
         super().__init__(**kwargs)
-        assert (
-            not self.mask_on and not self.keypoint_on
-        ), "Mask/Keypoints not supported in Rotated ROIHeads."
+        # assert (
+        #     not self.mask_on and not self.keypoint_on
+        # ), "Mask/Keypoints not supported in Rotated ROIHeads."
         assert not self.train_on_pred_boxes, "train_on_pred_boxes not implemented for RROIHeads!"
 
     @classmethod
@@ -212,6 +213,33 @@ class RROIHeads(StandardROIHeads):
             "box_head": box_head,
             "box_predictor": box_predictor,
         }
+
+    @classmethod
+    def _init_mask_head(cls, cfg, input_shape):
+        if not cfg.MODEL.MASK_ON:
+            return {}
+        # fmt: off
+        in_features       = cfg.MODEL.ROI_HEADS.IN_FEATURES
+        pooler_resolution = cfg.MODEL.ROI_MASK_HEAD.POOLER_RESOLUTION
+        pooler_scales     = tuple(1.0 / input_shape[k].stride for k in in_features)
+        sampling_ratio    = cfg.MODEL.ROI_MASK_HEAD.POOLER_SAMPLING_RATIO
+        pooler_type       = cfg.MODEL.ROI_MASK_HEAD.POOLER_TYPE
+        # fmt: on
+        assert pooler_type in ["ROIAlignRotated"], pooler_type
+
+        in_channels = [input_shape[f].channels for f in in_features][0]
+
+        ret = {"mask_in_features": in_features}
+        ret["mask_pooler"] = ROIPooler(
+            output_size=pooler_resolution,
+            scales=pooler_scales,
+            sampling_ratio=sampling_ratio,
+            pooler_type=pooler_type,
+        )
+        ret["mask_head"] = build_mask_head(
+            cfg, ShapeSpec(channels=in_channels, width=pooler_resolution, height=pooler_resolution)
+        )
+        return ret
 
     @torch.no_grad()
     def label_and_sample_proposals(self, proposals, targets):
@@ -257,7 +285,10 @@ class RROIHeads(StandardROIHeads):
 
             if has_gt:
                 sampled_targets = matched_idxs[sampled_idxs]
-                proposals_per_image.gt_boxes = targets_per_image.gt_boxes[sampled_targets]
+                for (trg_name, trg_value) in targets_per_image.get_fields().items():
+                    if trg_name.startswith("gt_") and not proposals_per_image.has(trg_name):
+                        proposals_per_image.set(trg_name, trg_value[sampled_targets])
+                # proposals_per_image.gt_boxes = targets_per_image.gt_boxes[sampled_targets]
             else:
                 gt_boxes = RotatedBoxes(
                     targets_per_image.gt_boxes.tensor.new_zeros((len(sampled_idxs), 5))
