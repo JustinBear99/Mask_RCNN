@@ -204,6 +204,7 @@ class Trainer(DefaultTrainer):
         return build_detection_train_loader(cfg, mapper=DatasetMapper(cfg, is_train=True, augmentations=[
             T.ResizeShortestEdge(short_edge_length=[900, 1200], max_size=1600, sample_style='range'),
             T.RandomFlip(),
+            # T.RandomRotation(-30, 30)
         #     T.RandomCrop('relative_range', (0.5, 0.5)),
         #     T.RandomContrast(0.8, 1.2),
         #     T.RandomBrightness(0.8, 1.2),
@@ -293,7 +294,7 @@ def setup(args):
 def main(args):
     # register_coco_instances('asparagus_train', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3, 'bar': 4} , "./datasets/coco/annotations/train/annotations.json", "./datasets/coco/annotations/train")
     # register_coco_instances('asparagus_val', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3, 'bar': 4} , "./datasets/coco/annotations/test_458/annotations.json", "./datasets/coco/annotations/test_458")
-    register_coco_instances('asparagus_train', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3} , "./datasets/coco/annotations/train_firstiter/annotations.json", "./datasets/coco/annotations/train_firstiter")
+    register_coco_instances('asparagus_train', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3} , "./datasets/coco/annotations/Journal/annotations.json", "./datasets/coco/annotations/Journal")
     register_coco_instances('asparagus_val', {'_background_': 0, 'clump': 1, 'stalk': 2, 'spear': 3} , "./datasets/coco/annotations/val/annotations.json", "./datasets/coco/annotations/val")
     
     cfg = setup(args)
